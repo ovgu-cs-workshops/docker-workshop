@@ -5,7 +5,8 @@
   <div class="corners"></div>
 
   <header>
-    <h2>{{title}}</h2>
+    <h1 *ngIf="titleLarge">{{title}}</h1>
+    <h2 *ngIf="!titleLarge">{{title}}</h2>
   </header>
 
   <main>

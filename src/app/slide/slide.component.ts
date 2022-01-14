@@ -12,6 +12,7 @@ import { DateService } from '../services/date.service';
 export class SlideComponent {
   @Input() public scale = 1;
   @Input() public title: string;
+  @Input() public titleLarge = false;
   public order: number;
   public totalOrder: number;
   public orderSubject = new BehaviorSubject<number>(0);

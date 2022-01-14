@@ -1,6 +1,8 @@
 <chapter>
   <slide
-    title="An interactive introduction to Containers">
+    title="An interactive introduction to Containers"
+    [titleLarge]="true"
+  >
     <div class="layout-1x1">
       <div class="layout-left">
         <h3>
@@ -36,9 +38,180 @@
 <chapter title="Introduction: Containers">
   <slide
     title="Why that?">
-    <div class="layout-1">
-      <img class="layout-center" src="./assets/version-control.svg">
+    <div class="layout-2x2">
+      <div class="layout-top-left layout-centering">
+        <img width="600" src="./assets/sceptical.png">
+      </div>
+      <div class="layout-top-right layout-centering">
+        <img width="600" src="./assets/fliptable.png">
+      </div>
+      <div class="layout-bottom2 layout-centering">IT during application update (stock photo)</div>
     </div>
+  </slide>
+
+  <slide
+    title="Why that?">
+    <div class="layout-1">
+      <ul>
+        <li>Containers are all about isolation</li>
+          <ul><li>But so are VMs?</li></ul>
+        <li>Containers is a very vague term</li>
+        <li>Containers provide a unique set of benefits</li>
+          <ul>
+            <li>for developers <b>and</b> for admins</li>
+          </ul>
+      </ul>
+    </div>
+  </slide>
+  <slide
+    title="Why that?">
+    <div class="layout-1">
+      <ul>
+        <li>No more dependency hell!</li>
+        <li>Coexistence of applications!</li>
+        <li>Atomic updates and rollbacks!</li>
+        <li>Horizontal Scaling (if supported)!</li>
+        <hr>
+        <li>Reproducible Environments!</li>
+        <li>Fiddling with software without trashing your linux!</li>
+      </ul>
+    </div>
+  </slide>
+</chapter>
+
+<chapter title="Basics">
+  <slide title="So, WHAT exactly is a container?">
+    <div class="layout-2">
+      <q class="layout-top">A linux container consists of one or more processes that are isolated from the remaining system.</q>
+      <ul>
+        <li>Isolated Filesystem</li>
+        <li>Isolated process, network, memory, clock, IPC</li>
+        <li>Resource limits</li>
+        <li><b>Set of technologies to make applications coexist in peace</b></li>
+      </ul>
+    </div>
+  </slide>
+    <slide title="Isn't that just virtualization?">
+    <div class="layout-1x1x1">
+      <div class="layout-left columns">
+        <span>Hosts</span><br>
+        <img src="./assets/hosts.png">
+      </div>
+      <div class="layout-center columns">
+        <span>VMs</span><br>
+        <img src="./assets/vms.png">
+      </div>
+      <div class="layout-right columns">
+        <span>Containers</span><br>
+        <img src="./assets/containers.png">
+      </div>
+    </div>
+  </slide>
+  <slide title="Backing Technologies: Namespaces / CGroups">
+    <div class="layout-1">
+      <ul>
+        <li>Control Groups (CGroups) are used to limit resources for a group of processes (CPU, Memory)</li>
+        <li>Namespaces are used to hide certain aspects of the host</li>
+          <ul>
+            <li>Filesystem NS hide hosts filesystem (chroot)</li>
+            <li>NetNS hide hosts network interfaces</li>
+            <li>PID NS hide hosts processes</li>
+            <li>User NS can change user IDs</li>
+            <li>Time NS can change the time</li>
+          </ul>
+        <li>Namespaces are inherited to child processes.</li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Backing Technologies: OCI">
+    <div class="layout-1x1">
+      <ul class="layout-left">
+        <li>OCI = Open Container Image</li>
+        <li>Transport format for containers</li>
+        <li>List of layers in a container</li>
+        <hr>
+        <li>Container Filesystem is built by merging all layers top down, into an empty, temporary directory, then chroot</li>
+        <li>Done by a <b>Container Runtime</b>
+      </ul>
+      <img class="layout-right layout-centering" width="600" src="./assets/layerfs.png">
+    </div>
+  </slide>
+</chapter>
+
+<chapter title="Docker">
+  <slide title="So, what is Docker?">
+    <div class="layout-1">
+      <ul>
+        <li>Docker is a <b>Container Runtime</b></li>
+        <li>It creates, manages and builds containers</li>
+        <li>It is the most widely used container runtime</li>
+        <li>Has much more features than a plain container runtime</li>
+        <hr>
+        <li>We will look at a few in detail now</li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Running an existing container">
+    <div class="layout-2">
+      <pre class="layout-top">$ docker run [OPTIONS] IMAGE [COMMAND] [ARGUMENTS...] # run plain container
+$ docker run -it debian:buster bash # run a shell inside debian (interactive)
+$ docker run -e FOO=bar debian:buster # pass environment variable FOO
+$ docker run -v $(pwd):/app debian:buster # mount current directory to /app</pre>
+      <tty class="layout-bottom"></tty>
+    </div>
+  </slide>
+  <slide title="Docker Networking">
+    <div class="layout-1">
+      <ul>
+        <li>Docker supports three network modes</li>
+        <ul>
+          <li>None - Container has no network access at all</li>
+          <li>Host - Container has no network isolation, acts like the host</li>
+          <li>Bridge - Container is attached to a virtual switch on the host <b>(Default)</b></li>
+        </ul>
+        <li>Docker networks map to bridge network interfaces</li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Docker Networks">
+    <div class="layout-1">
+      <ul>
+        <li>Host acts as a router to the outside world, gets assigned an IP</li>
+        <ul><li>e.g. 172.17.0.1</li></ul>
+        <li>Every container gets assigned an IP address within the subnet of the network</li>
+        <ul><li>e.g. 172.17.0.2, .3, .4, etc.</li></ul>
+        <li>Services within containers reachable from host under container IP</li>
+        <li>Other containers in the same network can be reached by name (DNS)</li>
+        <ul><li>e.g. application-database if that's the container name</li></ul>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Docker Networks HandsOn">
+    <div class="layout-2">
+      <pre class="layout-top">$ docker network ls # list existing networks
+$ docker network create name # create a new network
+$ docker run --network=name IMAGE # attach a container to a specific network
+$ docker network inspect name # view details about a network (JSON format)</pre>
+      <tty class="layout-bottom"></tty>
+    </div>
+  </slide>
+
+  <slide title="Building our own container - Manifests">
+    Example container Manifest, docker build, multistage build
+  </slide>
+  <slide title="Building our own container - HandsOn">
+    running and experimenting
+  </slide>
+  <slide title="Container Registries">
+    docker pull/push to registry
+    distributing images
+    dangers of running untrusted/unverified images
+  </slide>
+</chapter>
+
+<chapter title="Applications and Containers">
+  <slide title="Application properties">
+    Best practices for application design, versioning, repositories, CI, Building Images, Documentation, Configuration, Persistence
   </slide>
 </chapter>
 
