@@ -153,10 +153,19 @@
   </slide>
   <slide title="Running an existing container">
     <div class="layout-2">
-      <pre class="layout-top">$ docker run [OPTIONS] IMAGE [COMMAND] [ARGUMENTS...] # run plain container
-$ docker run -it debian:buster bash # run a shell inside debian (interactive)
-$ docker run -e FOO=bar debian:buster # pass environment variable FOO
-$ docker run -v $(pwd):/app debian:buster # mount current directory to /app</pre>
+      <pre class="layout-top">$ docker <b>run</b> [OPTIONS] IMAGE [COMMAND] [ARGUMENTS...] # run plain container
+$ docker <b>run</b> -it debian:buster bash # run a shell inside debian (interactive)
+$ docker <b>run</b> -e FOO=bar debian:buster # pass environment variable FOO
+$ docker <b>run</b> -v $(pwd):/app debian:buster # mount current directory to /app</pre>
+      <tty class="layout-bottom"></tty>
+    </div>
+  </slide>
+  <slide title="More container commands">
+    <div class="layout-2">
+      <pre class="layout-top">$ docker <b>ps</b> # show running containers
+$ docker <b>rm</b> CONTAINER # remove container including its filesystem
+$ docker <b>top</b> CONTAINER # show process statistics for container
+$ docker <b>logs</b> CONTAINER # show stdout of PID 1 in container</pre>
       <tty class="layout-bottom"></tty>
     </div>
   </slide>
@@ -188,30 +197,128 @@ $ docker run -v $(pwd):/app debian:buster # mount current directory to /app</pre
   </slide>
   <slide title="Docker Networks HandsOn">
     <div class="layout-2">
-      <pre class="layout-top">$ docker network ls # list existing networks
-$ docker network create name # create a new network
-$ docker run --network=name IMAGE # attach a container to a specific network
-$ docker network inspect name # view details about a network (JSON format)</pre>
+      <pre class="layout-top">$ docker <b>network ls</b> # list existing networks
+$ docker <b>network create</b> name # create a new network
+$ docker <b>run</b> --network=name IMAGE # attach a container to a specific network
+$ docker <b>network inspect</b> name # view details about a network (JSON format)</pre>
       <tty class="layout-bottom"></tty>
     </div>
   </slide>
 
   <slide title="Building our own container - Manifests">
-    Example container Manifest, docker build, multistage build
+    <div class="layout-1x1">
+      <ul class="layout-left">
+        <li>Image defined by a manifest file</li>
+        <li>One line in the manifest yields one layer in the container</li>
+        <li><b>FROM</b> - base image</li>
+        <li><b>COPY/ADD</b> - add files from host</li>
+        <li><b>WORKDIR</b> - change directory in container</li>
+        <li><b>RUN</b> - execute command in container</li>
+        <li><b>ENTRYPOINT</b> - which command shall be run on start</li>
+      </ul>
+      <pre class="layout-right">
+# Specify base image
+<b>FROM</b> alpine:3.16
+
+# Install dependencies
+<b>RUN</b> apk add --no-cache nginx
+
+# Copy application
+<b>COPY</b> . /usr/share/nginx/html
+
+# Provide application on this port
+<b>EXPOSE</b>> 80
+
+# Run server
+<b>ENTRYPOINT</b> /usr/bin/nginx
+      </pre>
+    </div>
   </slide>
+
   <slide title="Building our own container - HandsOn">
-    running and experimenting
+    <div class="layout-2">
+      <pre class="layout-top">
+$ docker <b>build</b> DIR # build a container according to the Dockerfile in DIR
+$ docker <b>build</b> -t image:v1 . # build current directory with tag image:v1
+$ docker <b>tag</b> CONTAINERREF image:v2 # add a image:v2 tag to CONTAINERREF</pre>
+      <tty class="layout-bottom"></tty>
+    </div>
   </slide>
-  <slide title="Container Registries">
-    docker pull/push to registry
-    distributing images
-    dangers of running untrusted/unverified images
+  <slide title="Distributing our container - HandsOn">
+    <div class="layout-2">
+      <pre class="layout-top">
+$ docker <b>login</b> docker.example.com # login to a container registry
+$ docker <b>tag</b> REF docker.example.com/image:v1 # tag image to point to registry
+$ docker <b>push</b> docker.example.com/image:v1 # push tagged image to registry
+$ docker <b>pull</b> docker.example.com/image:v1 # pull built image to this PC</pre>
+      <tty class="layout-bottom"></tty>
+    </div>
+  </slide>
+  <slide title="Building containers - best practices">
+    <div class="layout-1x2">
+      <ul class="layout-left">
+        <li>Version pinning for base image</li>
+        <li>Version pinning for libraries/deps</li>
+        <li>Dependencies in an own layer</li>
+        <li>Remove temporary files in commands</li>
+        <li>Separate build and run stage</li>
+        <li>Don't download files blindly from the internet</li>
+        <li>One container - one job</li>
+        <li>No credentials in manifest files</li>
+      </ul>
+      <pre class="layout-top-right">FROM alpine:edge <i># no pinning</i>
+RUN apk add curl <i># leftover files</i>
+RUN curl https://foo.de -o /app
+ENTRYPOINT /app</pre>
+      <div class="layout-bottom-right layout-centering" style="height: 800px;">
+        <img height="500" src="./assets/living-on-the-edge.jpg">
+      </div>
+    </div>
   </slide>
 </chapter>
 
 <chapter title="Applications and Containers">
-  <slide title="Application properties">
-    Best practices for application design, versioning, repositories, CI, Building Images, Documentation, Configuration, Persistence
+  <slide title="Application Design">
+    <div class="layout-1">
+      <ul>
+        <li>Fail Fast (on config issues)</li>
+        <li>Expose a health check</li>
+        <li>Explicit dependencies</li>
+        <li>Prefer network over unix sockets</li>
+        <li>Configuration from env/file</li>
+        <li>Secrets from env/file</li>
+        <li>No dynamic code loading</li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Running an Application">
+    <div class="layout-2">
+      <q class="layout-top">If one container does one job and my app is one container, how do I access a database?</q>
+      <q class="layout-bottom answer">Orchestration, e.g. docker-compose, docker swarm, kubernetes, zookeeper...</q>
+    </div>
+  </slide>
+  <slide title="docker-compose">
+    <div class="layout-1x1">
+      <ul class="layout-left">
+        <li>compose is a tool to start and link several containers</li>
+        <li>uses a yaml manifest file to define all containers</li>
+        <li><b>NOT</b> a production tool</li>
+        <li>Used for development environments</li>
+        <li>Can specify volumes, environment, networking, versions...</li>
+        <li>Limited to one machine</li>
+      </ul>
+      <div class="layout-right layout-2">
+        <div class="layout-top layout-centering">
+          <img src="./assets/compose.jpg" width="600">
+        </div>
+        <h3 class="layout-bottom layout-x-centering">docker-compose (stock photo)</h3>
+      </div>
+    </div>
+  </slide>
+  <slide title="docker-compose - HandsOn">
+    <div class="layout-1">
+      <tty></tty>
+    </div>
   </slide>
 </chapter>
 

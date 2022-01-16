@@ -140,6 +140,12 @@ blockquote {
     align-self: center;
     justify-self: center;
   }
+  &-y-centering {
+    align-self: center;
+  }
+  &-x-centering {
+    justify-self: center;
+  }
   &-bottom2 {
     grid-area: bottom-left / span 2;
   }
