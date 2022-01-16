@@ -169,7 +169,7 @@ $ docker <b>logs</b> CONTAINER # show stdout of PID 1 in container</pre>
       <tty class="layout-bottom"></tty>
     </div>
   </slide>
-  <slide title="Docker Networking">
+  <slide title="Docker Network modes">
     <div class="layout-1">
       <ul>
         <li>Docker supports three network modes</li>
@@ -195,7 +195,11 @@ $ docker <b>logs</b> CONTAINER # show stdout of PID 1 in container</pre>
       </ul>
     </div>
   </slide>
-  <slide title="Docker Networks HandsOn">
+  <slide title="Docker Networks visualized">
+    <!-- TODO: Image -->
+  </slide>
+
+  <slide title="Docker Networks - HandsOn">
     <div class="layout-2">
       <pre class="layout-top">$ docker <b>network ls</b> # list existing networks
 $ docker <b>network create</b> name # create a new network
@@ -204,6 +208,7 @@ $ docker <b>network inspect</b> name # view details about a network (JSON format
       <tty class="layout-bottom"></tty>
     </div>
   </slide>
+
 
   <slide title="Building our own container - Manifests">
     <div class="layout-1x1">
@@ -315,9 +320,116 @@ ENTRYPOINT /app</pre>
       </div>
     </div>
   </slide>
+  <slide title="docker-compose - Example">
+    <div class="layout-1">
+      <pre style="overflow: auto;">
+version: '3'
+
+services:
+  backend:
+    image: backendimage:v1
+    container_name: mybackend
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - app
+    volumes:
+      - ./data/app:/data
+      - ./conf:/etc/app/config
+    env_file:
+      - variables.env
+
+  db:
+    image: postgres:12-alpine
+    container_name: mydb
+    restart: unless-stopped
+    networks:
+      - default
+    env_file:
+      - variables.env
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+networks:
+  default:
+      </pre>
+    </div>
+  </slide>
   <slide title="docker-compose - HandsOn">
     <div class="layout-1">
       <tty></tty>
+    </div>
+  </slide>
+</chapter>
+
+<chapter title="Advanced tricks with docker">
+  <slide title="buildx">
+    <div class="layout-1">
+      <ul>
+        <li>buildx is an advanced container build tool for docker</li>
+        <li>buildx allows e.g. cross platform builds by utilizing qemu</li>
+        <li>buildx + manifest allows automated builds for several platforms</li>
+        <li>buildx builds independent stages in parallel</li>
+        <li>buildx can shrinken images by flattening layers</li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Container and Image conversion">
+    <div class="layout-1">
+      <ul>
+        <li>What if I have a manually built container and I want to have an image?</li>
+        <ul><li><pre>$ docker commit CONTAINER</pre></li></ul>
+        <li>What if I want to send an image to another machine?</li>
+        <ul>
+          <li><pre>$ docker export IMAGE &gt; file.tar.gz</pre></li>
+          <li><pre>$ docker import IMAGE &lt; file.tar.gz</pre></li>
+        </ul>
+        <hr>
+        <li><b>These are discouraged, however sometimes needed.</b></li>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Device Passthrough & Capabilities">
+    <div class="layout-1">
+      <ul>
+        <li>How can I use e.g. a serial port?</li>
+        <ul>
+          <li>Easy! Just mount the file unter /dev into your container</li>
+          <li><b>Caution:</b> Some devices may need CAP_SYS_ADMIN</li>
+        </ul>
+        <li>How do I add this capability then?</li>
+        <ul>
+          <li>Use <b>cap_add</b> in your compose manifest</li>
+          <li>Use <b>--cap-add</b> in docker run</li>
+        </ul>
+        <li>How do I use a different user ID?</li>
+        <ul>
+          <li>Use <b>--user UID</b> in docker run</li>
+        </ul>
+      </ul>
+    </div>
+  </slide>
+  <slide title="Cleanup">
+    <div class="layout-1">
+      <ul>
+        <li>Help! I'm running out of disk space!</li>
+        <li>How do I remove unused images?</li>
+        <ul>
+          <li><pre>$ docker image prune</pre></li>
+        </ul>
+        <li>And containrs?</li>
+        <ul>
+          <li><pre>$ docker container prune</pre></li>
+        </ul>
+        <li>What about networks?</li>
+        <ul>
+          <li><pre>$ docker network prune</pre></li>
+        </ul>
+        <li>Volumes? (you guessed it!)</li>
+        <ul>
+          <li><pre>$ docker volume prune</pre></li>
+        </ul>
+      </ul>
     </div>
   </slide>
 </chapter>
