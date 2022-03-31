@@ -212,6 +212,16 @@ $ docker <b>network inspect</b> name # view details about a network (JSON format
     </div>
   </slide>
 
+  <slide title="Docker Volumes">
+    <div class="layout-2">
+      <pre class="layout-top">$ docker <b>volume ls</b> # list existing volume
+$ docker <b>volume create</b> name # create new volume
+$ docker <b>run</b> -v=name:/path/in/container IMAGE # mount volume
+$ docker <b>volume inspect</b> name # view details about a volume (JSON format)
+      </pre>
+    </div>
+  </slide>
+
 
   <slide title="Building our own container - Manifests">
     <div class="layout-1x1">
@@ -235,7 +245,7 @@ $ docker <b>network inspect</b> name # view details about a network (JSON format
 <b>COPY</b> . /usr/share/nginx/html
 
 # Provide application on this port
-<b>EXPOSE</b>> 80
+<b>EXPOSE</b> 80
 
 # Run server
 <b>ENTRYPOINT</b> /usr/bin/nginx
@@ -420,7 +430,7 @@ networks:
         <ul>
           <li><pre>$ docker image prune</pre></li>
         </ul>
-        <li>And containrs?</li>
+        <li>And containers?</li>
         <ul>
           <li><pre>$ docker container prune</pre></li>
         </ul>
