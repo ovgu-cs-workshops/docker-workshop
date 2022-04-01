@@ -72,7 +72,7 @@
         <li>Atomic updates and rollbacks!</li>
         <li>Horizontal Scaling (if supported)!</li>
         <hr>
-        <li>Reproducible Environments!</li>
+        <li>Reproducible Environments across multiple workstations and servers!</li>
         <li>Fiddling with software without trashing your linux!</li>
       </ul>
     </div>
@@ -198,7 +198,7 @@ $ docker <b>logs</b> CONTAINER # show stdout of PID 1 in container</pre>
   <slide title="Docker Networks visualized">
     <div class="layout-2">
       <img class="layout-top layout-centering" src="./assets/docker-networking.png" height="600">
-      <h3 class="layout-bottom layout-x-centering">Networking models of docker vs. traditional</h3>
+      <h3 class="layout-bottom layout-x-centering">Traditional vs. Docker networking model</h3>
     </div>
   </slide>
 
@@ -223,7 +223,7 @@ $ docker <b>volume inspect</b> name # view details about a volume (JSON format)
   </slide>
 
 
-  <slide title="Building our own container - Manifests">
+  <slide title="Building our own container - Manifests / Dockerfile">
     <div class="layout-1x1">
       <ul class="layout-left">
         <li>Image defined by a manifest file</li>
@@ -284,13 +284,37 @@ $ docker <b>pull</b> docker.example.com/image:v1 # pull built image to this PC</
         <li>One container - one job</li>
         <li>No credentials in manifest files</li>
       </ul>
-      <pre class="layout-top-right">FROM alpine:edge <i># no pinning</i>
+      <pre class="layout-top-right"><b># HOW NOT TO DO IT</b>
+FROM alpine:edge <i># no pinning</i>
 RUN apk add curl <i># leftover files</i>
 RUN curl https://foo.de -o /app
 ENTRYPOINT /app</pre>
       <div class="layout-bottom-right layout-centering" style="height: 800px;">
-        <img height="500" src="./assets/living-on-the-edge.jpg">
+        <img height="450" src="./assets/living-on-the-edge.jpg">
       </div>
+    </div>
+  </slide>
+
+  <slide title="Building containers - minifying Image Size">
+    <div class="layout-1x1">
+      <ul class="layout-left">
+        <li>Sensible base image choice (<b>Alpine Linux</b> vs. Ubuntu)</li>
+        <li>One line in the manifest yields one layer in the container</li>
+        <li>Separate build and run stages</li>
+        <li>For apt-based images: Clenaup after install (see right)</li>
+      </ul>
+      <pre class="layout-right">
+# Install dependencies
+
+<b>RUN</b> apt update && \
+    apt install nginx && \
+    rm -rf /var/apt/lists/*
+
+# Note: All in one command
+# to only yield one layer!
+
+# Saves ~8MB per container image
+      </pre>
     </div>
   </slide>
 </chapter>
